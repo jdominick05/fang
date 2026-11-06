@@ -1,0 +1,6 @@
+__pycache__/
+*.pyc
+# captures contain other people's broadcast traffic — keep them out of git
+*.pcap
+*.pcapng
+*.raw

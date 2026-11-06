@@ -1,0 +1,15 @@
+[project]
+name = "fang"
+version = "0.1.0"
+description = "Receive-only toolkit for the Ubertooth One: spectrum analyzer, BLE scanner and tracker detector, connection follower, Classic Bluetooth survey"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+fang = "fang.cli:main"
+
+[tool.setuptools]
+packages = ["fang", "fang.data"]
+
+[tool.setuptools.package-data]
+"fang.data" = ["*.tsv"]

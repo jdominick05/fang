@@ -1,0 +1,4 @@
+#!/usr/bin/env bash
+# Run fang from its source checkout (no install needed; stdlib only).
+here="$(cd "$(dirname "$(readlink -f "$0")")/.." && pwd)"
+exec env PYTHONPATH="$here${PYTHONPATH:+:$PYTHONPATH}" python3 -m fang "$@"
