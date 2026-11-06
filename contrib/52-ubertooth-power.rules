@@ -1,0 +1,5 @@
+# /etc/udev/rules.d/52-ubertooth-power.rules
+# Keep the Ubertooth out of USB runtime autosuspend: its firmware often fails
+# to resume and hangs until replugged. (With TLP, use 50-ubertooth.conf
+# instead: TLP's own udev hook runs later and would override this.)
+ACTION=="add", SUBSYSTEM=="usb", ATTR{idVendor}=="1d50", ATTR{idProduct}=="600[0-3]", TEST=="power/control", ATTR{power/control}="on"

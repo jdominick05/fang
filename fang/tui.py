@@ -609,6 +609,9 @@ class App:
         stdscr.keypad(True)
         self.init_colors()
         self.activate()
+        if self.info.get("usb_autosuspend"):
+            self.flash("warning: USB autosuspend is on for the Ubertooth and can hang it between runs; "
+                       "run `fang info` for the fix", 15)
         last_draw = 0.0
         try:
             while True:

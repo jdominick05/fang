@@ -11,8 +11,10 @@ import time
 
 from . import __version__
 from .device import (BOARD_NAMES, FLASH_HINT, ApiMismatch, RawRecorder,
-                     ReplayDevice, Ubertooth, list_devices)
-from .usb import UsbError
+                     ReplayDevice, Ubertooth, autosuspend_devices, autosuspend_fix,
+                     list_devices)
+from .usb import (LIBUSB_ERROR_IO, LIBUSB_ERROR_NO_DEVICE, LIBUSB_ERROR_TIMEOUT,
+                  UsbError)
 
 
 def _emit(obj):
@@ -38,6 +40,8 @@ class Stopper:
 def open_device(args):
     if getattr(args, "replay", None):
         return ReplayDevice(args.replay)
+    if autosuspend_devices():
+        print(f"fang: warning: {autosuspend_fix()}\n", file=sys.stderr)
     ut = Ubertooth(index=args.device)
     if getattr(args, "record", None):
         ut.recorder = RawRecorder(args.record, args.command or "")
@@ -56,6 +60,7 @@ def device_info(ut) -> dict:
         "serial": ut.serial(),
         "part_number": f"0x{ut.part_number():08x}",
         "usb": f"bus {ut.bus} device {ut.address}",
+        "usb_autosuspend": bool(autosuspend_devices()),
     }
 
 
@@ -94,6 +99,8 @@ def cmd_info(args):
     except ApiMismatch as e:
         print(e)
         return 2
+    if info["usb_autosuspend"]:
+        print(f"\n{autosuspend_fix()}\n", file=sys.stderr)
     if args.json:
         _emit(info)
         return 0
@@ -453,6 +460,10 @@ def main(argv=None) -> int:
         return 1
     except UsbError as e:
         print(f"fang: USB error — {e}", file=sys.stderr)
+        if autosuspend_devices():
+            print(f"\n{autosuspend_fix()}", file=sys.stderr)
+        elif e.code in (LIBUSB_ERROR_IO, LIBUSB_ERROR_NO_DEVICE, LIBUSB_ERROR_TIMEOUT):
+            print("Unplug and replug the Ubertooth to reset it.", file=sys.stderr)
         return 1
     except KeyboardInterrupt:
         return 130

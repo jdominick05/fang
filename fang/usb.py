@@ -30,6 +30,7 @@ _FRIENDLY = {
     LIBUSB_ERROR_BUSY: "device busy — another Ubertooth tool is probably running "
                        "(close ubertooth-btle / ubertooth-specan / other fang instances)",
     LIBUSB_ERROR_NO_DEVICE: "device disconnected",
+    LIBUSB_ERROR_IO: "I/O error — the Ubertooth stopped responding (its firmware is hung)",
 }
 
 

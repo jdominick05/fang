@@ -39,6 +39,17 @@ Add `--json` for JSON lines, `--pcap FILE` for Wireshark, `-s N` to limit run ti
 - A "separated" tracker is away from its owner. That's usually innocent; it only matters if one keeps following you to different places.
 - It is receive-only by design: no jamming or transmit modes. Only capture connections between devices you own.
 
+## Troubleshooting
+
+**`LIBUSB_ERROR_IO`, or the Ubertooth stops enumerating until it's replugged:** USB autosuspend is on for it, and its firmware often fails to wake up. This is common on laptops running TLP or powertop. Fix it, then replug:
+
+```bash
+sudo cp contrib/50-ubertooth.conf /etc/tlp.d/                  # if you use TLP
+sudo cp contrib/52-ubertooth-power.rules /etc/udev/rules.d/    # otherwise
+```
+
+`fang info` shows whether autosuspend is still on.
+
 ## Tests
 
 ```bash

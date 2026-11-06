@@ -488,6 +488,42 @@ class ReplayDevice:
         pass
 
 
+def autosuspend_devices() -> list[str]:
+    """sysfs paths of attached Ubertooths whose USB runtime power management
+    is 'auto'. The firmware frequently fails to resume from autosuspend and
+    hangs (LIBUSB_ERROR_IO, then 'device not accepting address' until it is
+    replugged) — observed repeatedly on a TLP-managed laptop."""
+    import glob
+    import os
+    out = []
+    for vid_file in glob.glob("/sys/bus/usb/devices/*/idVendor"):
+        d = os.path.dirname(vid_file)
+        try:
+            with open(vid_file) as f:
+                if f.read().strip() != "1d50":
+                    continue
+            with open(os.path.join(d, "power", "control")) as f:
+                if f.read().strip() == "auto":
+                    out.append(d)
+        except OSError:
+            continue
+    return out
+
+
+def autosuspend_fix() -> str:
+    import os
+    import shutil
+    contrib = os.path.normpath(os.path.join(os.path.dirname(__file__), "..", "contrib"))
+    if shutil.which("tlp"):
+        how = f"  sudo cp {contrib}/50-ubertooth.conf /etc/tlp.d/"
+    else:
+        how = (f"  sudo cp {contrib}/52-ubertooth-power.rules /etc/udev/rules.d/ && "
+               "sudo udevadm control --reload")
+    return ("USB autosuspend is enabled for the Ubertooth. Its firmware often fails to wake\n"
+            "from it and hangs (LIBUSB_ERROR_IO; then it needs a replug). To fix, run:\n"
+            f"{how}\nthen unplug and replug the Ubertooth.")
+
+
 def list_devices() -> list[dict]:
     with UsbContext() as ctx:
         found = ctx.find(VENDOR_ID, {PID_UBERTOOTH_ONE, PID_UBERTOOTH_ZERO})
